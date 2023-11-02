@@ -1,20 +1,18 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { getStatusBarHeight } from "react-native-status-bar-height"; 
+
+import CustomCalendar from './src/component/CustomCalendar';
 
 export default function App() {
     return (
         <View style={styles.container}>
-            <Text>Project Calendar</Text>
-            <StatusBar style="auto" />
+            <CustomCalendar />
         </View>
     );
 }
-
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
+        marginTop: getStatusBarHeight(),
+        marginHorizontal: 16,
     },
 });
