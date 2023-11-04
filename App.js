@@ -1,9 +1,10 @@
-import { StyleSheet, View } from 'react-native';
-import { getStatusBarHeight } from "react-native-status-bar-height"; 
+import { StyleSheet, View, Dimensions } from 'react-native';
 
 import CustomCalendar from './src/component/CustomCalendar';
+import { statusBarHeight } from './src/style/globalStyle';
 
 export default function App() {
+
     return (
         <View style={styles.container}>
             <CustomCalendar />
@@ -12,7 +13,7 @@ export default function App() {
 }
 const styles = StyleSheet.create({
     container: {
-        marginTop: getStatusBarHeight(),
-        marginHorizontal: 16,
+        marginTop: statusBarHeight,
+        flex: 1
     },
 });
