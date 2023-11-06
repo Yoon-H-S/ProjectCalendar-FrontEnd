@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, KeyboardAvoidingView, TextInput, TouchableWithoutFeedback, Keyboard, View, Platform } from 'react-native';
 import { LocaleConfig } from 'react-native-calendars';
+import axios from 'axios';
 
 import { colors, height } from '../style/globalStyle';
 import MonthCalendar from './MonthCalendar';
@@ -19,41 +20,68 @@ LocaleConfig.defaultLocale = 'ko';
 export default function CustomCalendar() {
     const today = new Date(new Date().getTime() + (1000 * 60 * 60 * 9)).toISOString().slice(0, 10);
     const [selectDate, setSelectDate] = useState(today);
-    const [showDate, setShowDate] = useState(today);
+    const [showYear, setShowYear] = useState(today.slice(0, 4));
+    const [restDate, setRestDate] = useState([]);
+
+    useEffect(() => {
+        axios.get('http://192.168.45.95:8080/api/rest-day', {
+            params: {
+                year: showYear
+            }
+        }).then((response) => {
+            var restDay = {};
+            response.data?.map((value) => {
+                var date = value.date
+                restDay = {
+                    ...restDay,
+                    [date]: {marked: true, rest: true, periods: [{color: colors.sunday, startingDay: value.name, endingDay: true}]}
+                };
+            });
+            setRestDate(restDay);
+        }).catch((error) => {
+            console.log(error);
+        });
+    }, [showYear]);
 
     const setToday = () => {
         setSelectDate(today);
-        setShowDate(today);
         dismiss();
-    }
+    };
 
-    const changeSelectDate = (date) => {
+    const changeSelectDate = useCallback((date) => {
         setSelectDate(date);
         dismiss();
-    }
+    });
 
-    const changeShowDate = (date) => {
-        setShowDate(date);
+    const changeMonth = useCallback((date) => {
+        if(date.slice(0, 7) !== selectDate.slice(0, 7)) {
+            if(date.slice(0, 7) === today.slice(0, 7)) {
+                setSelectDate(today);
+            } else {
+                setSelectDate(date.slice(0, 8) + '01');
+            }
+        }
+        setShowYear(date.slice(0, 4));
         dismiss();
-    }
+    });
 
     const dismiss = () => {
         Keyboard.dismiss();
-    }
+    };
 
     return (
         <>
             <TouchableWithoutFeedback onPress={dismiss}>
                 <View>
                     <CalendarHeader
-                        showDate={showDate}
+                        showYear={showYear}
                         setToday={setToday}
                     />
                     <MonthCalendar
                         selectDate={selectDate}
                         setSelectDate={changeSelectDate}
-                        showDate={showDate}
-                        setShowDate={changeShowDate}
+                        changeMonth={changeMonth}
+                        restDate={restDate}
                     />
                 </View>
             </TouchableWithoutFeedback>
@@ -64,6 +92,7 @@ export default function CustomCalendar() {
             >
                 <TextInput
                     placeholder='빠른일정추가'
+                    placeholderTextColor={colors.line}
                     style={style.quickAdd}
                 />
             </KeyboardAvoidingView>

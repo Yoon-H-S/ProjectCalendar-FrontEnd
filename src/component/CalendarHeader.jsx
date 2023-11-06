@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
 import { colors, height } from '../style/globalStyle';
 
-export default function CalendarHeader({showDate, setToday}) {
+export default function CalendarHeader({showYear, setToday}) {
     return(
         <View style={style.header}>
             <View style={style.headerContent}>
@@ -13,7 +13,7 @@ export default function CalendarHeader({showDate, setToday}) {
                     />
                 </TouchableOpacity>
                 <View style={style.year}>
-                    <Text style={style.yearText}>{showDate.slice(0, 4)}년</Text>
+                    <Text style={style.yearText}>{showYear}년</Text>
                 </View>
             </View>
             <View style={style.headerContent}>
