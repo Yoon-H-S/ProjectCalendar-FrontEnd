@@ -1,7 +1,7 @@
 import { Calendar } from 'react-native-calendars';
 import { colors, height } from '../style/globalStyle';
 
-export default function MonthCalendar({selectDate, setSelectDate, changeMonth, restDate}) {
+export default function MonthCalendar({selectDate, setSelectDate, lunar, changeMonth, restDate}) {
     return (
         <Calendar
             enableSwipeMonths={true} // 스와이프로 달 이동
@@ -11,7 +11,12 @@ export default function MonthCalendar({selectDate, setSelectDate, changeMonth, r
             initialDate={selectDate} // 처음에 표시될 달
             markedDates={{ // 일정이나 선택을 표시할 날짜
                 ...restDate,
-                [selectDate]: {selected: true, marked: restDate[selectDate]?.marked, rest: restDate[selectDate]?.rest, periods: restDate[selectDate]?.periods}
+                [selectDate]: {
+                    selected: true,
+                    lunar: {date: lunar.date, leap: lunar.leap},
+                    marked: restDate[selectDate]?.marked,
+                    rest: restDate[selectDate]?.rest,
+                    periods: restDate[selectDate]?.periods}
             }} 
             markingType='multi-period' // 일정 표시 방식
             onDayPress={date => { // 날짜 클릭시 호출
@@ -89,15 +94,16 @@ const customStyle = {
                 alignSelf: 'stretch',
                 alignItems: 'center',
                 flex: 1,
-                width: '100%'
+                width: '100%',
+                borderColor: 'white',
+                borderWidth: 1,
             },
             base: {
-                width: 20,
-                height: 20,
+                width: 16,
+                height: 16,
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginTop: 2,
-                marginBottom: 4
+                marginTop: 2
             },
             selected: {
                 backgroundColor: 'white',
@@ -120,6 +126,12 @@ const customStyle = {
             },
             satText: {
                 color: colors.saturday
+            },
+            lunarText: {
+                fontSize: 8,
+                color: colors.text,
+                height: 8,
+                marginBottom: 2
             }
         }
     },

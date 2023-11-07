@@ -20,28 +20,53 @@ LocaleConfig.defaultLocale = 'ko';
 export default function CustomCalendar() {
     const today = new Date(new Date().getTime() + (1000 * 60 * 60 * 9)).toISOString().slice(0, 10);
     const [selectDate, setSelectDate] = useState(today);
+    const [lunar, setLunar] = useState({
+        year: '',
+        date: '',
+        leap: ''
+    });
     const [showYear, setShowYear] = useState(today.slice(0, 4));
-    const [restDate, setRestDate] = useState([]);
+    const [restDate, setRestDate] = useState({});
 
     useEffect(() => {
-        axios.get('http://192.168.45.95:8080/api/rest-day', {
-            params: {
-                year: showYear
-            }
-        }).then((response) => {
-            var restDay = {};
-            response.data?.map((value) => {
-                var date = value.date
-                restDay = {
-                    ...restDay,
-                    [date]: {marked: true, rest: true, periods: [{color: colors.sunday, startingDay: value.name, endingDay: true}]}
-                };
+        if(!(showYear +  "-01-01" in restDate)) {
+            axios.get('http://39.118.149.70:8080/api/rest-day', {
+                params: {
+                    year: showYear
+                }
+            }).then((response) => {
+                var rd = restDate;
+                response.data?.map((value) => {
+                    var date = value.date
+                    rd = {
+                        ...rd,
+                        [date]: {marked: true, rest: true, periods: [{color: colors.sunday, startingDay: value.name, endingDay: true}]}
+                    };
+                });
+                setRestDate(rd);
+            }).catch((error) => {
+                console.log(error);
             });
-            setRestDate(restDay);
+        }
+    }, [showYear]);
+
+    useEffect(() => {
+        axios.get('http://39.118.149.70:8080/api/lunar-date', {
+            params: {
+                year: selectDate.slice(0, 4),
+                month: selectDate.slice(5, 7),
+                day: selectDate.slice(8, 10)
+            }
+        }).then(response => {
+            setLunar({
+                year: response.data.lunYear,
+                date: Number(response.data.lunMonth) + "/" + Number(response.data.lunDay),
+                leap: response.data.leap
+            });
         }).catch((error) => {
             console.log(error);
         });
-    }, [showYear]);
+    }, [selectDate]);
 
     const setToday = () => {
         setSelectDate(today);
@@ -50,6 +75,7 @@ export default function CustomCalendar() {
 
     const changeSelectDate = useCallback((date) => {
         setSelectDate(date);
+        setLunar({});
         dismiss();
     });
 
@@ -61,7 +87,9 @@ export default function CustomCalendar() {
                 setSelectDate(date.slice(0, 8) + '01');
             }
         }
-        setShowYear(date.slice(0, 4));
+        if(showYear !== date.slice(0, 4)) {
+            setShowYear(date.slice(0, 4));
+        }
         dismiss();
     });
 
@@ -80,6 +108,7 @@ export default function CustomCalendar() {
                     <MonthCalendar
                         selectDate={selectDate}
                         setSelectDate={changeSelectDate}
+                        lunar={lunar}
                         changeMonth={changeMonth}
                         restDate={restDate}
                     />
