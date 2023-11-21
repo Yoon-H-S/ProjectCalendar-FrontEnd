@@ -30,7 +30,7 @@ export default function CustomCalendar() {
 
     useEffect(() => {
         if(!(showYear +  "-01-01" in restDate)) {
-            axios.get('http://39.118.149.70:8080/api/rest-day', {
+            axios.get('http://192.168.45.95:8080/api/rest-day', {
                 params: {
                     year: showYear
                 }
@@ -51,7 +51,7 @@ export default function CustomCalendar() {
     }, [showYear]);
 
     useEffect(() => {
-        axios.get('http://39.118.149.70:8080/api/lunar-date', {
+        axios.get('http://192.168.45.95:8080/api/lunar-date', {
             params: {
                 year: selectDate.slice(0, 4),
                 month: selectDate.slice(5, 7),
@@ -86,6 +86,7 @@ export default function CustomCalendar() {
             } else {
                 setSelectDate(date.slice(0, 8) + '01');
             }
+            setLunar({});
         }
         if(showYear !== date.slice(0, 4)) {
             setShowYear(date.slice(0, 4));
