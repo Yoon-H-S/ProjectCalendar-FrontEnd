@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
 import { colors, height } from '../style/globalStyle';
 
-export default function CalendarHeader({showYear, setToday}) {
+export default function CalendarHeader({showYear, setToday, setIsAdd}) {
     return(
         <View style={style.header}>
             <View style={style.headerContent}>
@@ -31,7 +31,7 @@ export default function CalendarHeader({showYear, setToday}) {
                         resizeMode='contain'
                     />
                 </TouchableOpacity>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => setIsAdd(true)}>
                     <Image
                         style={style.button}
                         source={require('../../assets/add.png')}

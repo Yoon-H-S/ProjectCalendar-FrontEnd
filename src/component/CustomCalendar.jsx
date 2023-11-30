@@ -1,23 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, KeyboardAvoidingView, TextInput, TouchableWithoutFeedback, Keyboard, View, Platform } from 'react-native';
-import { LocaleConfig } from 'react-native-calendars';
 import axios from 'axios';
 
 import { colors, height } from '../style/globalStyle';
 import MonthCalendar from './MonthCalendar';
 import CalendarHeader from './CalendarHeader';
 
-LocaleConfig.locales['ko'] = {
-    monthNames: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
-    monthNamesShort: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
-    dayNames: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
-    dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
-    today: "오늘"
-}
-
-LocaleConfig.defaultLocale = 'ko';
-
-export default function CustomCalendar() {
+export default function CustomCalendar({setIsAdd}) {
     const today = new Date(new Date().getTime() + (1000 * 60 * 60 * 9)).toISOString().slice(0, 10);
     const [selectDate, setSelectDate] = useState(today);
     const [lunar, setLunar] = useState({
@@ -30,7 +19,7 @@ export default function CustomCalendar() {
 
     useEffect(() => {
         if(!(showYear +  "-01-01" in restDate)) {
-            axios.get('http://192.168.45.95:8080/api/rest-day', {
+            axios.get('http://192.168.233.235:8080/api/rest-day', {
                 params: {
                     year: showYear
                 }
@@ -51,7 +40,7 @@ export default function CustomCalendar() {
     }, [showYear]);
 
     useEffect(() => {
-        axios.get('http://192.168.45.95:8080/api/lunar-date', {
+        axios.get('http://192.168.233.235:8080/api/lunar-date', {
             params: {
                 year: selectDate.slice(0, 4),
                 month: selectDate.slice(5, 7),
@@ -105,6 +94,7 @@ export default function CustomCalendar() {
                     <CalendarHeader
                         showYear={showYear}
                         setToday={setToday}
+                        setIsAdd={setIsAdd}
                     />
                     <MonthCalendar
                         selectDate={selectDate}
