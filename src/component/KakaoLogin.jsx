@@ -3,9 +3,11 @@ import { WebView } from 'react-native-webview';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
+import server from '../../address';
+
 export default function KakaoLogin(props) {
     const REST_API_KEY = 'c0f42d0672e0de7f9bf0c5f37aa96c27';
-    const REDIRECT_URI = 'http://192.168.233.235:8080/api/kakao-api';
+    const REDIRECT_URI = server + '/api/kakao-api';
 
     const getCode = (target) => {
         const exp = 'code=';
@@ -27,7 +29,7 @@ export default function KakaoLogin(props) {
             }
         }).then((response) => {
             console.log(response.data.access_token);
-            axios.post('http://192.168.233.235:8080/api/kakao-login', null, {
+            axios.post(server + '/api/kakao-login', null, {
                 params: {
                     token: response.data.access_token
                 }

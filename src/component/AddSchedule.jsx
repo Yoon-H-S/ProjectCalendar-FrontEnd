@@ -1,32 +1,36 @@
-import React, { useState, useEffect , useRef } from 'react';
-import { StyleSheet, Text, TextInput, View, ScrollView, Image, Keyboard, Platform, TouchableWithoutFeedback, KeyboardAvoidingView } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { StyleSheet, Text, TextInput, View, ScrollView, Image, Keyboard, Platform, TouchableWithoutFeedback, KeyboardAvoidingView, Alert } from 'react-native';
 import axios from 'axios';
 
 import { colors, height, fullHeight, fullWidth } from '../style/globalStyle';
 import ScheduleContent from './ScheduleContent';
 import ScheduleDateTime from './ScheduleDateTime';
+import server from '../../address';
 
-export default function AddSchedule({setIsAdd}) {
+export default function AddSchedule({setIsAdd, userNum}) {
+    const today = new Date();
+    const [start, setStart] = useState(new Date(new Date().setHours(today.getHours() + 1, 0, 0)));
+    const [end, setEnd] = useState(new Date(new Date().setHours(today.getHours() + 2, 0, 0)));
     const textInputRef = useRef(null);
     const [title, setTitle] = useState('');
     const [memo, setMemo] = useState('');
-    const [file, setFile] = useState(null);
+    // const [file, setFile] = useState(null);
     const [contentValue, setContentValue] = useState({
         lunar: null,
         alarm: null,
         repeatType: null,
         repeatWeek: null,
         repeatEnd: null,
-        location: null
+        // location: null
     });
     const [contentName, setContentName] = useState({
         alarmName: '알림 없음',
         repeatName: '반복 안 함',
-        locationName: '장소 추가',
-        fileName: '파일 첨부'
+        // locationName: '장소 추가',
+        // fileName: '파일 첨부'
     });
 
-    const {alarmName, repeatName, locationName, fileName} = contentName;
+    const {alarmName, repeatName} = contentName;
     
     const changeContentName = (id, value) => {
         setContentName({
@@ -44,6 +48,30 @@ export default function AddSchedule({setIsAdd}) {
     const dismiss = () => {
         Keyboard.dismiss();
     };
+
+    const scheduleInsert = () => {
+        if(title === '') {
+            Alert.alert("일정 제목을 입력하세요.");
+            return;
+        }
+        axios.post(server + '/api/add-schedule', {
+                userNum: userNum,
+                title: title,
+                start: new Date(start.getTime() + (1000 * 60 * 60 * 9)),
+                end: new Date(end.getTime() + (1000 * 60 * 60 * 9)),
+                // lunar: contentValue.lunar,
+                memo: memo,
+                // notify: contentValue.alarm,
+                // repType: contentValue.repeatType,
+                // repWeek: contentValue.repeatWeek,
+                // repEnd: contentValue.repeatEnd
+        }).then((response) => {
+            console.log(response.data);
+            setIsAdd(false);
+        }).catch((error) => {
+            console.log(error);
+        });
+    }
 
     return (
         <TouchableWithoutFeedback onPress={dismiss}>
@@ -63,7 +91,7 @@ export default function AddSchedule({setIsAdd}) {
                         <Text style={style.title}>새로운 일정</Text>
                         <Text
                             style={style.text}
-                            onPress={() => setIsAdd(false)}
+                            onPress={() => scheduleInsert()}
                         >
                             추가
                         </Text>
@@ -76,7 +104,13 @@ export default function AddSchedule({setIsAdd}) {
                             onChangeText={text => setTitle(text)}
                             value={title}
                         />
-                        <ScheduleDateTime />
+                        <ScheduleDateTime
+                            today={today}
+                            start={start}
+                            setStart={setStart}
+                            end={end}
+                            setEnd={setEnd}
+                        />
                         <ScheduleContent
                             imgSrc={require('../../assets/alarm.png')}
                             text={alarmName}
@@ -89,18 +123,18 @@ export default function AddSchedule({setIsAdd}) {
                             change={changeContentName}
                             clickEvent={() => console.log("반복 클릭함")}
                         />
-                        <ScheduleContent
+                        {/* <ScheduleContent
                             imgSrc={require('../../assets/location.png')}
                             text={locationName}
                             change={changeContentName}
                             clickEvent={() => console.log("장소 클릭함")}
-                        />
-                        <ScheduleContent
+                        /> */}
+                        {/* <ScheduleContent
                             imgSrc={require('../../assets/file.png')}
                             text={fileName}
                             change={changeContentName}
                             clickEvent={() => console.log("파일 클릭함")}
-                        />
+                        /> */}
                         <TouchableWithoutFeedback onPress={handleViewPress}>
                             <View style={style.content}>
                                 <Image

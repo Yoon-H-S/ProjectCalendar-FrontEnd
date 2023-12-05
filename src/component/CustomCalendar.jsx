@@ -5,21 +5,37 @@ import axios from 'axios';
 import { colors, height } from '../style/globalStyle';
 import MonthCalendar from './MonthCalendar';
 import CalendarHeader from './CalendarHeader';
+import server from '../../address';
+import lunarData from '../../lunar';
 
-export default function CustomCalendar({setIsAdd}) {
+export default function CustomCalendar({isAdd, setIsAdd, userNum}) {
     const today = new Date(new Date().getTime() + (1000 * 60 * 60 * 9)).toISOString().slice(0, 10);
     const [selectDate, setSelectDate] = useState(today);
     const [lunar, setLunar] = useState({
-        year: '',
         date: '',
         leap: ''
     });
     const [showYear, setShowYear] = useState(today.slice(0, 4));
     const [restDate, setRestDate] = useState({});
+    const [schedule, setSchedule] = useState({});
+
+    useEffect(() => {
+        axios.get(server + '/api/schedule-list', {
+            params: {
+                userNum: userNum
+            }
+        }).then((response) => {
+            setSchedule(response.data.marker);
+            console.log(response.data);
+        }).catch((error) => {
+            console.log(error);
+        })
+
+    },[isAdd]);
 
     useEffect(() => {
         if(!(showYear +  "-01-01" in restDate)) {
-            axios.get('http://192.168.233.235:8080/api/rest-day', {
+            axios.get(server + '/api/rest-day', {
                 params: {
                     year: showYear
                 }
@@ -40,20 +56,10 @@ export default function CustomCalendar({setIsAdd}) {
     }, [showYear]);
 
     useEffect(() => {
-        axios.get('http://192.168.233.235:8080/api/lunar-date', {
-            params: {
-                year: selectDate.slice(0, 4),
-                month: selectDate.slice(5, 7),
-                day: selectDate.slice(8, 10)
-            }
-        }).then(response => {
-            setLunar({
-                year: response.data.lunYear,
-                date: Number(response.data.lunMonth) + "/" + Number(response.data.lunDay),
-                leap: response.data.leap
-            });
-        }).catch((error) => {
-            console.log(error);
+        const lunarInfo = lunarData.find(item => item.solar === selectDate);
+        setLunar({
+            date: Number(lunarInfo.lunar.slice(5, 7)) + "/" + Number(lunarInfo.lunar.slice(8, 10)),
+            leap: lunarInfo.lunar_type
         });
     }, [selectDate]);
 
@@ -64,7 +70,6 @@ export default function CustomCalendar({setIsAdd}) {
 
     const changeSelectDate = useCallback((date) => {
         setSelectDate(date);
-        setLunar({});
         dismiss();
     });
 
@@ -75,7 +80,6 @@ export default function CustomCalendar({setIsAdd}) {
             } else {
                 setSelectDate(date.slice(0, 8) + '01');
             }
-            setLunar({});
         }
         if(showYear !== date.slice(0, 4)) {
             setShowYear(date.slice(0, 4));
@@ -97,6 +101,7 @@ export default function CustomCalendar({setIsAdd}) {
                         setIsAdd={setIsAdd}
                     />
                     <MonthCalendar
+                        schedule={schedule}
                         selectDate={selectDate}
                         setSelectDate={changeSelectDate}
                         lunar={lunar}
@@ -105,7 +110,7 @@ export default function CustomCalendar({setIsAdd}) {
                     />
                 </View>
             </TouchableWithoutFeedback>
-            <KeyboardAvoidingView
+            {/* <KeyboardAvoidingView
                 behavior='position'
                 style={style.container}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 30 * height : 20 * height}
@@ -115,7 +120,7 @@ export default function CustomCalendar({setIsAdd}) {
                     placeholderTextColor={colors.line}
                     style={style.quickAdd}
                 />
-            </KeyboardAvoidingView>
+            </KeyboardAvoidingView> */}
         </>
     );
 }

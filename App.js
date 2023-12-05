@@ -21,7 +21,7 @@ LocaleConfig.defaultLocale = 'ko';
 export default function App() {
     const [number, setNumber] = useState(null);
     const [isReady, setIsReady] = useState(false);
-    const [isAdd, setIsAdd] = useState(true); // 나중에 false로 바꾸기
+    const [isAdd, setIsAdd] = useState(false);
 
     useEffect(() => {
         if(Platform.OS === 'web') {
@@ -46,8 +46,8 @@ export default function App() {
         <View style={styles.container}>
             {number !== null ?
                 <>
-                    <CustomCalendar setIsAdd={setIsAdd} />
-                    {isAdd && <AddSchedule setIsAdd={setIsAdd} />}
+                    <CustomCalendar isAdd={isAdd} setIsAdd={setIsAdd} userNum={number} />
+                    {isAdd && <AddSchedule setIsAdd={setIsAdd} userNum={number} />}
                 </>
             :
                 <KakaoLogin setNumber={setNumber} />

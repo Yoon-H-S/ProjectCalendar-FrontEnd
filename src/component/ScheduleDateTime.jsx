@@ -4,10 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { colors, height } from '../style/globalStyle';
 
-export default function ScheduleDateTime() {
-    const today = new Date();
-    const [start, setStart] = useState(new Date(new Date().setHours(today.getHours() + 1, 0, 0)));
-    const [end, setEnd] = useState(new Date(new Date().setHours(today.getHours() + 2, 0, 0)));
+export default function ScheduleDateTime({today, start, setStart, end, setEnd}) {
     const weekName = ['일', '월', '화', '수', '목', '금', '토'];
     const [show, setShow] = useState({
         type: null,
@@ -128,7 +125,7 @@ export default function ScheduleDateTime() {
                         !isAllTime && 
                         <Text style={{marginTop: 10}} onPress={() => changeShow('time', 'end')}>
                             {end.getHours() >= 12 ? 
-                                `오후 ${start.getHours() - 12 === 0 ? '12' : ('0' + (end.getHours() - 12)).slice(-2)}`
+                                `오후 ${end.getHours() - 12 === 0 ? '12' : ('0' + (end.getHours() - 12)).slice(-2)}`
                             :
                                 `오전 ${end.getHours() === 0 ? '12' : ('0' + end.getHours()).slice(-2)}`
                             }

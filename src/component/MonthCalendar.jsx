@@ -1,7 +1,29 @@
+import React, { useState, useEffect } from 'react';
 import { Calendar } from 'react-native-calendars';
 import { colors, height } from '../style/globalStyle';
 
-export default function MonthCalendar({selectDate, setSelectDate, lunar, changeMonth, restDate}) {
+export default function MonthCalendar({selectDate, setSelectDate, lunar, changeMonth, restDate, schedule}) {
+    const [mark, setMark] = useState({});
+
+    useEffect(() => {
+        const mergedSchedule = {
+            ...schedule
+        }
+
+        Object.entries(restDate).forEach(([date, { marked, periods, rest }]) => {
+            if (mergedSchedule[date]) {
+            // 같은 날짜가 존재하면 periods와 rest 합치기
+            mergedSchedule[date].periods = [...mergedSchedule[date].periods, ...periods];
+            mergedSchedule[date].rest = {rest};
+            } else {
+            // 같은 날짜가 없으면 새로운 날짜로 추가
+            mergedSchedule[date] = {marked, periods: [...periods], rest: {rest}};
+            }
+        });
+
+        setMark(mergedSchedule);
+    }, [restDate, schedule]);
+
     return (
         <Calendar
             enableSwipeMonths={true} // 스와이프로 달 이동
@@ -10,13 +32,13 @@ export default function MonthCalendar({selectDate, setSelectDate, lunar, changeM
             monthFormat='M월' // 월 표시 양식
             initialDate={selectDate} // 처음에 표시될 달
             markedDates={{ // 일정이나 선택을 표시할 날짜
-                ...restDate,
+                ...mark,
                 [selectDate]: {
                     selected: true,
                     lunar: {date: lunar.date, leap: lunar.leap},
-                    marked: restDate[selectDate]?.marked,
-                    rest: restDate[selectDate]?.rest,
-                    periods: restDate[selectDate]?.periods}
+                    marked: mark[selectDate]?.marked,
+                    rest: mark[selectDate]?.rest,
+                    periods: mark[selectDate]?.periods}
             }} 
             markingType='multi-period' // 일정 표시 방식
             onDayPress={date => { // 날짜 클릭시 호출
@@ -95,7 +117,7 @@ const customStyle = {
                 alignItems: 'center',
                 flex: 1,
                 width: '100%',
-                borderColor: 'white',
+                borderColor: '#ffffff00',
                 borderWidth: 1,
             },
             base: {
@@ -106,7 +128,7 @@ const customStyle = {
                 marginTop: 2
             },
             selected: {
-                backgroundColor: 'white',
+                backgroundColor: '#ffffff00',
                 borderColor: colors.primary,
                 borderRadius: 5,
                 borderWidth: 1,
@@ -130,8 +152,7 @@ const customStyle = {
             lunarText: {
                 fontSize: 8,
                 color: colors.text,
-                height: 8,
-                marginBottom: 2
+                height: 10 * height
             }
         }
     },
@@ -140,20 +161,19 @@ const customStyle = {
             minHeight: 15 * height,
             marginVertical: 1,
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            marginHorizontal: '2%'
         },
         startingDay: {
             borderTopLeftRadius: 2 * height,
-            borderBottomLeftRadius: 2 * height,
-            marginLeft: 1
+            borderBottomLeftRadius: 2 * height
         },
         endingDay: {
             borderTopRightRadius: 2 * height,
-            borderBottomRightRadius: 2 * height,
-            marginRight: 1
+            borderBottomRightRadius: 2 * height
         },
         text: {
-            fontSize: 10,
+            fontSize: 9,
             color: 'white',
             paddingVertical: 1
         }
