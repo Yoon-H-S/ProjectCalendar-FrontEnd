@@ -1,11 +1,12 @@
 import React, { useState, useRef } from 'react';
-import { StyleSheet, Text, TextInput, View, ScrollView, Image, Keyboard, Platform, TouchableWithoutFeedback, KeyboardAvoidingView, Alert } from 'react-native';
+import { StyleSheet, Text, TextInput, View, ScrollView, Image, Keyboard, Platform, TouchableWithoutFeedback, KeyboardAvoidingView, Alert, Modal, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 
-import { colors, height, fullHeight, fullWidth } from '../style/globalStyle';
+import { colors, height, fullHeight, fullWidth, statusBarHeight } from '../style/globalStyle';
 import ScheduleContent from './ScheduleContent';
 import ScheduleDateTime from './ScheduleDateTime';
 import server from '../../address';
+import Repeat from './Repeat';
 
 export default function AddSchedule({setIsAdd, userNum}) {
     const today = new Date();
@@ -14,30 +15,12 @@ export default function AddSchedule({setIsAdd, userNum}) {
     const textInputRef = useRef(null);
     const [title, setTitle] = useState('');
     const [memo, setMemo] = useState('');
-    // const [file, setFile] = useState(null);
-    const [contentValue, setContentValue] = useState({
-        lunar: null,
-        alarm: null,
-        repeatType: null,
-        repeatWeek: null,
-        repeatEnd: null,
-        // location: null
+    const [repeatName, setRepeatName] = useState('반복 안 함');
+    const [repeatValue, setRepeatValue] = useState({
+        type: null,
+        end: null
     });
-    const [contentName, setContentName] = useState({
-        alarmName: '알림 없음',
-        repeatName: '반복 안 함',
-        // locationName: '장소 추가',
-        // fileName: '파일 첨부'
-    });
-
-    const {alarmName, repeatName} = contentName;
-    
-    const changeContentName = (id, value) => {
-        setContentName({
-            ...contentName,
-            [id]: value
-        });
-    }
+    const [modalVisible, setModalVisible] = useState(false);
 
     const handleViewPress = () => {
         if (textInputRef.current) {
@@ -59,12 +42,9 @@ export default function AddSchedule({setIsAdd, userNum}) {
                 title: title,
                 start: new Date(start.getTime() + (1000 * 60 * 60 * 9)),
                 end: new Date(end.getTime() + (1000 * 60 * 60 * 9)),
-                // lunar: contentValue.lunar,
-                memo: memo,
-                // notify: contentValue.alarm,
-                // repType: contentValue.repeatType,
-                // repWeek: contentValue.repeatWeek,
-                // repEnd: contentValue.repeatEnd
+                // memo: memo,
+                repType: repeatValue.type,
+                repEnd: repeatValue.end
         }).then((response) => {
             console.log(response.data);
             setIsAdd(false);
@@ -73,28 +53,71 @@ export default function AddSchedule({setIsAdd, userNum}) {
         });
     }
 
+    const setRepeat = (type1, type2, num, date) => {
+        var n = null;
+        var e = null;
+        
+        switch(type1) {
+            case 0:
+                n = '반복 안 함';
+                break;
+            case 1:
+                n = '매일 반복';
+                break;
+            case 2:
+                n = '매주 반복';
+                break;
+            case 3:
+                n = '매달 반복';
+                break;
+            case 4:
+                n = '매년 반복';
+                break;
+        }
+
+        if(type1 !== 0) {
+            if(type2 === 1) {
+                n += `, ${num}번 반복 후 종료`;
+                e = num;
+            } else if(type2 === 2) {
+                n += `, ${date} 전까지 반복`;
+                e = date;
+            }
+        }
+
+        setRepeatValue({
+            ...repeatValue,
+            type: type1 === 0 ? null : type1,
+            end: e
+        });
+        setRepeatName(n);
+        setModalVisible(false);
+    }
+
     return (
         <TouchableWithoutFeedback onPress={dismiss}>
             <View style={style.container}>
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={() => {setModalVisible(!modalVisible)}}
+                >          
+                    <Repeat setModalVisible={setModalVisible} setRepeat={setRepeat} />
+                </Modal>
                 <KeyboardAvoidingView
                     behavior='height'
                     style={{flex: 1}}
                     keyboardVerticalOffset={Platform.OS === 'ios' ? 50 * height : 20 * height}
                 >
                     <View style={style.header}>
-                        <Text
-                            style={style.text}
-                            onPress={() => setIsAdd(false)}
-                        >
-                            취소
-                        </Text>
+                        <TouchableOpacity onPress={() => setIsAdd(false)}>
+                            <Text style={style.text}>취소</Text>
+                        </TouchableOpacity>
                         <Text style={style.title}>새로운 일정</Text>
-                        <Text
-                            style={style.text}
-                            onPress={() => scheduleInsert()}
-                        >
-                            추가
-                        </Text>
+                        <TouchableOpacity onPress={() => scheduleInsert()}>
+                            <Text style={style.text}>추가</Text>
+                        </TouchableOpacity>
                     </View>
                     <ScrollView>
                         <TextInput
@@ -113,28 +136,24 @@ export default function AddSchedule({setIsAdd, userNum}) {
                         />
                         <ScheduleContent
                             imgSrc={require('../../assets/alarm.png')}
-                            text={alarmName}
-                            change={changeContentName}
+                            text='알림 없음'
                             clickEvent={() => console.log("알림 클릭함")}
                         />
                         <ScheduleContent
                             imgSrc={require('../../assets/repeat.png')}
                             text={repeatName}
-                            change={changeContentName}
-                            clickEvent={() => console.log("반복 클릭함")}
+                            clickEvent={() => setModalVisible(true)}
                         />
-                        {/* <ScheduleContent
+                        <ScheduleContent
                             imgSrc={require('../../assets/location.png')}
-                            text={locationName}
-                            change={changeContentName}
+                            text='장소 추가'
                             clickEvent={() => console.log("장소 클릭함")}
-                        /> */}
-                        {/* <ScheduleContent
+                        />
+                        <ScheduleContent
                             imgSrc={require('../../assets/file.png')}
-                            text={fileName}
-                            change={changeContentName}
+                            text='파일 첨부'
                             clickEvent={() => console.log("파일 클릭함")}
-                        /> */}
+                        />
                         <TouchableWithoutFeedback onPress={handleViewPress}>
                             <View style={style.content}>
                                 <Image
@@ -162,7 +181,7 @@ export default function AddSchedule({setIsAdd, userNum}) {
 
 const style = StyleSheet.create({
     container: {
-        position: 'absolute',
+        marginTop: statusBarHeight,
         paddingHorizontal: 16,
         width: fullWidth ,
         height: fullHeight,

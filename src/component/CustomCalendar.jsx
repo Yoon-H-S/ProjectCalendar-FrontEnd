@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, KeyboardAvoidingView, TextInput, TouchableWithoutFeedback, Keyboard, View, Platform } from 'react-native';
+import { StyleSheet, TouchableWithoutFeedback, Keyboard, View, Modal } from 'react-native';
 import axios from 'axios';
 
 import { colors, height } from '../style/globalStyle';
@@ -7,8 +7,10 @@ import MonthCalendar from './MonthCalendar';
 import CalendarHeader from './CalendarHeader';
 import server from '../../address';
 import lunarData from '../../lunar';
+import AddSchedule from './AddSchedule';
 
-export default function CustomCalendar({isAdd, setIsAdd, userNum}) {
+export default function CustomCalendar({userNum}) {
+    const [isAdd, setIsAdd] = useState(false);
     const today = new Date(new Date().getTime() + (1000 * 60 * 60 * 9)).toISOString().slice(0, 10);
     const [selectDate, setSelectDate] = useState(today);
     const [lunar, setLunar] = useState({
@@ -26,7 +28,6 @@ export default function CustomCalendar({isAdd, setIsAdd, userNum}) {
             }
         }).then((response) => {
             setSchedule(response.data.marker);
-            console.log(response.data);
         }).catch((error) => {
             console.log(error);
         })
@@ -93,6 +94,14 @@ export default function CustomCalendar({isAdd, setIsAdd, userNum}) {
 
     return (
         <>
+            <Modal
+                animationType="slide"
+                transparent= {true}
+                visible={isAdd}
+                onRequestClose={() => setIsAdd(!isAdd)}
+            >
+                <AddSchedule setIsAdd={setIsAdd} userNum={userNum} />
+            </Modal>
             <TouchableWithoutFeedback onPress={dismiss}>
                 <View>
                     <CalendarHeader
@@ -110,17 +119,6 @@ export default function CustomCalendar({isAdd, setIsAdd, userNum}) {
                     />
                 </View>
             </TouchableWithoutFeedback>
-            {/* <KeyboardAvoidingView
-                behavior='position'
-                style={style.container}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 30 * height : 20 * height}
-            >
-                <TextInput
-                    placeholder='빠른일정추가'
-                    placeholderTextColor={colors.line}
-                    style={style.quickAdd}
-                />
-            </KeyboardAvoidingView> */}
         </>
     );
 }

@@ -6,7 +6,6 @@ import { LocaleConfig } from 'react-native-calendars';
 import CustomCalendar from './src/component/CustomCalendar';
 import { statusBarHeight } from './src/style/globalStyle';
 import KakaoLogin from './src/component/KakaoLogin';
-import AddSchedule from './src/component/AddSchedule';
 
 LocaleConfig.locales['ko'] = {
     monthNames: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
@@ -21,7 +20,6 @@ LocaleConfig.defaultLocale = 'ko';
 export default function App() {
     const [number, setNumber] = useState(null);
     const [isReady, setIsReady] = useState(false);
-    const [isAdd, setIsAdd] = useState(false);
 
     useEffect(() => {
         if(Platform.OS === 'web') {
@@ -45,10 +43,7 @@ export default function App() {
         isReady &&
         <View style={styles.container}>
             {number !== null ?
-                <>
-                    <CustomCalendar isAdd={isAdd} setIsAdd={setIsAdd} userNum={number} />
-                    {isAdd && <AddSchedule setIsAdd={setIsAdd} userNum={number} />}
-                </>
+                <CustomCalendar userNum={number} />
             :
                 <KakaoLogin setNumber={setNumber} />
             }

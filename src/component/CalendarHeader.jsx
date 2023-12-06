@@ -5,17 +5,10 @@ export default function CalendarHeader({showYear, setToday, setIsAdd}) {
     return(
         <View style={style.header}>
             <View style={style.headerContent}>
-                {/* <TouchableOpacity>
+                <TouchableOpacity>
                     <Image
                         style={style.button}
                         source={require('../../assets/menu.png')}
-                        resizeMode='contain'
-                    />
-                </TouchableOpacity> */}
-                <TouchableOpacity onPress={setToday}>
-                    <Image
-                        style={style.button}
-                        source={require('../../assets/today.png')}
                         resizeMode='contain'
                     />
                 </TouchableOpacity>
@@ -24,7 +17,13 @@ export default function CalendarHeader({showYear, setToday, setIsAdd}) {
                 </View>
             </View>
             <View style={style.headerContent}>
-                
+                <TouchableOpacity onPress={setToday}>
+                    <Image
+                        style={style.button}
+                        source={require('../../assets/today.png')}
+                        resizeMode='contain'
+                    />
+                </TouchableOpacity>
                 <TouchableOpacity>
                     <Image
                         style={style.button}
